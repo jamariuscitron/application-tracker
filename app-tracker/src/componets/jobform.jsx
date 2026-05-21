@@ -8,6 +8,7 @@ function JobForm() {
     const [company, setCompany] = useState("");
     const [position, setPosition] = useState("");
     const [status, setStatus] = useState("");
+    const [notes, setNotes] = useState("");
 
     // Function to handle form submission
     function handleSubmit(e) {
@@ -16,6 +17,7 @@ function JobForm() {
           company: company,
           position: position,
           status: status,
+          notes: notes
         };
     // add new application to array
    setApplications([...applications, newApplication]);
@@ -24,8 +26,14 @@ function JobForm() {
     setCompany("");
     setPosition("");
     setStatus("");
+    setNotes("");
     };
-    
+   //handle delete
+    function handleDelete(index) {
+      const updatedApplications = [...applications];
+      updatedApplications.splice(index, 1);
+      setApplications(updatedApplications);
+    }
     
     
     return(
@@ -45,8 +53,9 @@ function JobForm() {
           <option value="offer">Offer</option>
           <option value="rejected">Rejected</option>
         </select>
+        <textarea placeholder="Notes (optional)" name="notes" value={notes} ></textarea>
+        <button type="submit">Add Application</button>
 
-        <button type="submit">Add Job</button>
       </form>
      {/* DISPLAY APPLICATIONS */}
      </div>
@@ -63,13 +72,15 @@ function JobForm() {
               <strong>Status:</strong>{" "}
               {application.status}
             </p>
+            <p><strong>Notes:</strong>{" "}{application.notes}</p>
+             
+            <button>Edit</button>
+            <button>Delete</button>
+        
 
             <hr />
           </div>
      ))}
-     <div>
-
-     </div>
        </>
     );
 }
