@@ -1,66 +1,136 @@
 import { useState } from "react";
 
 function JobForm() {
-   // State to hold the list of job applications 
-   const [applications, setApplications] = useState([]);
-   
-   // State to hold the form input values
-    const [company, setCompany] = useState("");
-    const [position, setPosition] = useState("");
-    const [status, setStatus] = useState("");
-    const [notes, setNotes] = useState("");
+  // STATE FOR APPLICATIONS
+  const [applications, setApplications] = useState([]);
 
-    // Function to handle form submission
-    function handleSubmit(e) {
-        e.preventDefault();
-        const newApplication = {
-          company: company,
-          position: position,
-          status: status,
-          notes: notes
-        };
-    // add new application to array
-   setApplications([...applications, newApplication]);
+  // STATE FOR FORM INPUTS
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
+  const [status, setStatus] = useState("");
+  const [notes, setNotes] = useState("");
 
-    //clear inputs
+  // TRACK WHICH JOB IS BEING EDITED
+  const [editingId, setEditingId] = useState(null);
+
+  // HANDLE FORM SUBMIT
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const newApplication = {
+      id: Date.now(),
+      company,
+      position,
+      status,
+      notes,
+    };
+
+    // EDIT EXISTING JOB
+    if (editingId !== null) {
+      const updatedApplications = applications.map((application) => {
+        if (application.id === editingId) {
+          return {
+            ...application,
+            company,
+            position,
+            status,
+            notes,
+          };
+        }
+
+        return application;
+      });
+
+      setApplications(updatedApplications);
+
+      setEditingId(null);
+    } else {
+      // ADD NEW JOB
+      setApplications([...applications, newApplication]);
+    }
+
+    // CLEAR INPUTS
     setCompany("");
     setPosition("");
     setStatus("");
     setNotes("");
-    };
-   //handle delete
-    function handleDelete(index) {
-      const updatedApplications = [...applications];
-      updatedApplications.splice(index, 1);
-      setApplications(updatedApplications);
-    }
-    
-    
-    return(
-       <>
-     <div className="job-form">
-      <form onSubmit={handleSubmit}>
-        <label for="company">Company Name:</label>
-        <input type="text" id="company" name="company" value={company} onChange={(e) => setCompany(e.target.value)} />
+  }
 
-        <label for="position">Position:</label>
-        <input type="text" id="position" name="position" value={position} onChange={(e) => setPosition(e.target.value)} />
+  // DELETE JOB
+ function handleDelete(idToDelete) {
+  setApplications((prev) =>
+    prev.filter((app) => app.id !== idToDelete)
+  );
+}
+  // EDIT JOB
+  function handleEdit(application) {
+    setCompany(application.company);
+    setPosition(application.position);
+    setStatus(application.status);
+    setNotes(application.notes);
 
-        <label for="status">Application Status:</label>
-        <select id="status" name="status" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="applied">Applied</option>
-          <option value="interviewing">Interviewing</option>
-          <option value="offer">Offer</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <textarea placeholder="Notes (optional)" name="notes" value={notes} ></textarea>
-        <button type="submit">Add Application</button>
+    setEditingId(application.id);
+  }
 
-      </form>
-     {/* DISPLAY APPLICATIONS */}
-     </div>
-     {applications.map((application,index) => (
-      <div key={index}>
+  return (
+    <>
+      <div className="job-form">
+        <form onSubmit={handleSubmit}>
+          {/* COMPANY */}
+          <label htmlFor="company">Company Name:</label>
+
+          <input
+            type="text"
+            id="company"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+          />
+
+          {/* POSITION */}
+          <label htmlFor="position">Position:</label>
+
+          <input
+            type="text"
+            id="position"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+          />
+
+          {/* STATUS */}
+          <label htmlFor="status">Application Status:</label>
+
+          <select
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="">Select Status</option>
+            <option value="Applied">Applied</option>
+            <option value="Interviewing">Interviewing</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+
+          {/* NOTES */}
+          <label htmlFor="notes">Notes:</label>
+
+          <textarea
+            id="notes"
+            placeholder="Notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          ></textarea>
+
+          <button type="submit" className="submit-btn">
+            {editingId !== null ? "Update Job" : "Add Job"}
+          </button>
+        </form>
+      </div>
+
+      {/* DISPLAY APPLICATIONS */}
+      <div className="applications-list">
+        {applications.map((application) => (
+          <div key={application.id} className="job-card">
             <h2>{application.company}</h2>
 
             <p>
@@ -72,17 +142,34 @@ function JobForm() {
               <strong>Status:</strong>{" "}
               {application.status}
             </p>
-            <p><strong>Notes:</strong>{" "}{application.notes}</p>
-             
-            <button>Edit</button>
-            <button>Delete</button>
-        
+
+            <p>
+              <strong>Notes:</strong>{" "}
+              {application.notes}
+            </p>
+
+            {/* EDIT BUTTON */}
+            <button
+              className="edit-btn"
+              onClick={() => handleEdit(application)}
+            >
+              Edit
+            </button>
+
+            {/* DELETE BUTTON */}
+            <button
+              className="delete-btn"
+              onClick={() => handleDelete(application.id)}
+            >
+              Delete
+            </button>
 
             <hr />
           </div>
-     ))}
-       </>
-    );
+        ))}
+      </div>
+    </>
+  );
 }
 
 export default JobForm;
